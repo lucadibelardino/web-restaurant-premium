@@ -11,7 +11,7 @@ import Events from './pages/Events';
 
 function App() {
   return (
-    <Router>
+    <Router basename="/web-restaurant-premium">
       <div className="app">
         <Navbar />
         <Routes>
