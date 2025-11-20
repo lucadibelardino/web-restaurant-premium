@@ -41,8 +41,8 @@ const Navbar = () => {
 
                 <div className="navbar-links">
                     <Link to="/menu">Menu</Link>
-                    <Link to="/#story">Story</Link>
-                    <Link to="/#events">Events</Link>
+                    <Link to="/story">Story</Link>
+                    <Link to="/events">Events</Link>
                 </div>
 
                 <div className="navbar-actions">

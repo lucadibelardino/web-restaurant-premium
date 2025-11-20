@@ -1,108 +1,110 @@
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { useRef } from 'react';
 import Button from '../components/UI/Button';
-import ParallaxSection from '../components/UI/ParallaxSection';
+
+const Section = ({ children, image, align = 'center' }) => {
+    const ref = useRef(null);
+    const { scrollYProgress } = useScroll({
+        target: ref,
+        offset: ["start end", "end start"]
+    });
+
+    const y = useTransform(scrollYProgress, [0, 1], ["-20%", "20%"]);
+    const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
+
+    return (
+        <section ref={ref} style={{
+            height: '100vh',
+            position: 'relative',
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center'
+        }}>
+            <motion.div style={{
+                position: 'absolute',
+                top: 0, left: 0, right: 0, bottom: 0,
+                backgroundImage: `url(${image})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                y,
+                zIndex: -1
+            }} />
+            <div style={{
+                position: 'absolute',
+                top: 0, left: 0, right: 0, bottom: 0,
+                background: 'rgba(0,0,0,0.4)',
+                zIndex: 0
+            }} />
+
+            <motion.div style={{
+                position: 'relative',
+                zIndex: 1,
+                padding: 'var(--space-2xl)',
+                maxWidth: '600px',
+                textAlign: align === 'center' ? 'center' : 'left',
+                color: 'white',
+                opacity
+            }}>
+                {children}
+            </motion.div>
+        </section>
+    );
+};
 
 const Home = () => {
     return (
         <main>
-            {/* Hero Section */}
-            <section style={{
-                height: '100vh',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexDirection: 'column',
-                textAlign: 'center',
-                padding: '0 1rem',
-                position: 'relative',
-                overflow: 'hidden'
-            }}>
-                <div style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    backgroundImage: 'url(https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=2000)',
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    opacity: 0.3,
-                    zIndex: -1
-                }} />
-
+            {/* Hero / Entrance */}
+            <Section image="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=2000">
                 <motion.h1
-                    initial={{ opacity: 0, y: 30 }}
+                    initial={{ opacity: 0, y: 50 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.2 }}
-                    style={{
-                        fontSize: 'var(--font-size-display)',
-                        marginBottom: 'var(--space-md)'
-                    }}
+                    transition={{ duration: 1 }}
+                    style={{ fontSize: 'var(--font-size-display)', marginBottom: 'var(--space-md)' }}
                 >
                     LU
                 </motion.h1>
-                <motion.p
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.4 }}
-                    style={{
-                        fontSize: 'var(--font-size-xl)',
-                        color: 'var(--color-text-secondary)',
-                        marginBottom: 'var(--space-lg)',
-                        maxWidth: '600px'
-                    }}
-                >
-                    Where culinary art meets digital elegance.
-                </motion.p>
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.6 }}
-                >
-                    <Link to="/menu">
-                        <Button variant="primary">View Menu</Button>
+                <p style={{ fontSize: 'var(--font-size-xl)', marginBottom: 'var(--space-lg)' }}>
+                    Enter a world where taste meets art.
+                </p>
+                <Link to="/menu">
+                    <Button variant="primary">Begin Journey</Button>
+                </Link>
+            </Section>
+
+            {/* The Dining Room */}
+            <Section image="https://images.unsplash.com/photo-1550966871-3ed3c47e2ce2?auto=format&fit=crop&q=80&w=2000" align="left">
+                <h2 style={{ fontSize: 'var(--font-size-4xl)', marginBottom: 'var(--space-md)', color: 'var(--color-accent-gold)' }}>The Atmosphere</h2>
+                <p style={{ fontSize: 'var(--font-size-lg)', lineHeight: 1.6 }}>
+                    Designed for intimacy and grandeur. Our dining room is a sanctuary of calm, where every detail is curated to enhance your culinary experience.
+                </p>
+            </Section>
+
+            {/* The Kitchen */}
+            <Section image="https://images.unsplash.com/photo-1556910103-1c02745a30bf?auto=format&fit=crop&q=80&w=2000" align="right">
+                <h2 style={{ fontSize: 'var(--font-size-4xl)', marginBottom: 'var(--space-md)', color: 'var(--color-accent-gold)' }}>The Craft</h2>
+                <p style={{ fontSize: 'var(--font-size-lg)', lineHeight: 1.6 }}>
+                    Precision. Passion. Perfection. Our chefs transform the finest local ingredients into edible masterpieces.
+                </p>
+            </Section>
+
+            {/* The Experience / Call to Action */}
+            <Section image="https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&q=80&w=2000">
+                <h2 style={{ fontSize: 'var(--font-size-4xl)', marginBottom: 'var(--space-md)' }}>Your Table Awaits</h2>
+                <p style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-xl)' }}>
+                    Join us for an unforgettable evening.
+                </p>
+                <div style={{ display: 'flex', gap: 'var(--space-md)', justifyContent: 'center' }}>
+                    <Link to="/reservations">
+                        <Button variant="primary">Book Now</Button>
                     </Link>
-                </motion.div>
-            </section>
-
-            {/* Story Section with Parallax */}
-            <ParallaxSection
-                id="story"
-                image="https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&q=80&w=2000"
-                className="story-section"
-            >
-                <div style={{
-                    background: 'rgba(10, 10, 10, 0.8)',
-                    padding: 'var(--space-xl)',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid var(--color-border-subtle)',
-                    textAlign: 'center'
-                }}>
-                    <h2 style={{ fontSize: 'var(--font-size-3xl)', marginBottom: 'var(--space-md)', color: 'var(--color-accent-gold)' }}>Our Story</h2>
-                    <p style={{ fontSize: 'var(--font-size-lg)', lineHeight: 1.8, color: 'var(--color-text-secondary)' }}>
-                        Born from a passion for innovation and tradition, Lu represents the convergence of gastronomic excellence and modern aesthetics.
-                        Every dish is a masterpiece, every flavor a story waiting to be told.
-                    </p>
+                    <Link to="/story">
+                        <Button variant="outline">Read Our Story</Button>
+                    </Link>
                 </div>
-            </ParallaxSection>
-
-            {/* Events Section */}
-            <section id="events" style={{ padding: 'var(--space-2xl) 0', textAlign: 'center' }}>
-                <div className="container">
-                    <h2 style={{ fontSize: 'var(--font-size-3xl)', marginBottom: 'var(--space-lg)' }}>Private Events</h2>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--space-md)' }}>
-                        <div style={{ padding: 'var(--space-md)', border: '1px solid var(--color-border-subtle)' }}>
-                            <h3 style={{ color: 'var(--color-accent-gold)', marginBottom: 'var(--space-sm)' }}>The Gold Room</h3>
-                            <p style={{ color: 'var(--color-text-secondary)' }}>Intimate dining for up to 12 guests.</p>
-                        </div>
-                        <div style={{ padding: 'var(--space-md)', border: '1px solid var(--color-border-subtle)' }}>
-                            <h3 style={{ color: 'var(--color-accent-gold)', marginBottom: 'var(--space-sm)' }}>The Terrace</h3>
-                            <p style={{ color: 'var(--color-text-secondary)' }}>Al fresco experience for up to 40 guests.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            </Section>
         </main>
     );
 };
