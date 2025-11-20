@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import InteractiveMenu from '../features/Menu/InteractiveMenu';
 
-const Menu = () => {
+const MenuPage = () => {
     return (
         <motion.div
             className="page-container container"
@@ -21,4 +21,4 @@ const Menu = () => {
     );
 };
 
-export default Menu;
+export default MenuPage;
