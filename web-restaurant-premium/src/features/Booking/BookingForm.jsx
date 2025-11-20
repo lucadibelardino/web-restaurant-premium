@@ -1,13 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Button from '../../components/UI/Button';
+import Calendar from './Calendar';
 import './BookingForm.css';
 
 const BookingForm = () => {
     const [step, setStep] = useState(1);
     const [isChecking, setIsChecking] = useState(false);
     const [formData, setFormData] = useState({
-        date: '',
+        date: null,
         time: '',
         guests: 2,
         name: '',
@@ -15,10 +16,76 @@ const BookingForm = () => {
         phone: ''
     });
     const [aiSuggestion, setAiSuggestion] = useState(null);
+    const [availableTimes, setAvailableTimes] = useState([]);
+
+    // Generate time slots based on selected date
+    useEffect(() => {
+        if (!formData.date) return;
+
+        const times = [];
+        const now = new Date();
+        const isToday = formData.date.getDate() === now.getDate() &&
+            formData.date.getMonth() === now.getMonth() &&
+            formData.date.getFullYear() === now.getFullYear();
+
+        let startHour = 18; // Restaurant opens at 18:00
+        let startMinute = 0;
+
+        if (isToday) {
+            // If today, start from current time + 30 mins, rounded up to next 30 min slot
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+
+            let nextSlot = new Date(now);
+            nextSlot.setMinutes(nextSlot.getMinutes() + 30);
+
+            // Round to next 30 min
+            const remainder = nextSlot.getMinutes() % 30;
+            if (remainder !== 0) {
+                nextSlot.setMinutes(nextSlot.getMinutes() + (30 - remainder));
+            }
+            nextSlot.setSeconds(0);
+            nextSlot.setMilliseconds(0);
+
+            startHour = nextSlot.getHours();
+            startMinute = nextSlot.getMinutes();
+
+            // If it's past closing time (e.g. 23:00), no slots available
+            if (startHour >= 23) {
+                setAvailableTimes([]);
+                return;
+            }
+
+            // If it's before opening, start at opening
+            if (startHour < 18) {
+                startHour = 18;
+                startMinute = 0;
+            }
+        }
+
+        // Generate slots until 22:30
+        for (let h = startHour; h <= 22; h++) {
+            for (let m = (h === startHour ? startMinute : 0); m < 60; m += 30) {
+                const timeString = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+                times.push(timeString);
+            }
+        }
+
+        setAvailableTimes(times);
+        setFormData(prev => ({ ...prev, time: '' })); // Reset time when date changes
+    }, [formData.date]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleDateSelect = (date) => {
+        setFormData(prev => ({ ...prev, date }));
+    };
+
+    const handleTimeSelect = (time) => {
+        setFormData(prev => ({ ...prev, time }));
     };
 
     const checkAvailability = () => {
@@ -27,7 +94,7 @@ const BookingForm = () => {
         setTimeout(() => {
             setIsChecking(false);
             // Randomly simulate "busy" times to show AI suggestion
-            if (Math.random() > 0.5) {
+            if (Math.random() > 0.7) {
                 setAiSuggestion("The selected time is in high demand. We have a prime table available at 21:00. Would you like to secure it?");
             } else {
                 setStep(2);
@@ -53,17 +120,40 @@ const BookingForm = () => {
                         className="booking-step"
                     >
                         <h2>Reserve Your Table</h2>
+
                         <div className="form-group">
-                            <label>Date</label>
-                            <input type="date" name="date" value={formData.date} onChange={handleInputChange} />
+                            <label>Select Date</label>
+                            <Calendar selectedDate={formData.date} onDateSelect={handleDateSelect} />
                         </div>
-                        <div className="form-group">
-                            <label>Time</label>
-                            <input type="time" name="time" value={formData.time} onChange={handleInputChange} />
-                        </div>
+
+                        {formData.date && (
+                            <motion.div
+                                className="form-group"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                            >
+                                <label>Select Time</label>
+                                {availableTimes.length > 0 ? (
+                                    <div className="time-grid">
+                                        {availableTimes.map(time => (
+                                            <button
+                                                key={time}
+                                                className={`time-slot ${formData.time === time ? 'selected' : ''}`}
+                                                onClick={() => handleTimeSelect(time)}
+                                            >
+                                                {time}
+                                            </button>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="no-slots">No tables available for this date.</p>
+                                )}
+                            </motion.div>
+                        )}
+
                         <div className="form-group">
                             <label>Guests</label>
-                            <select name="guests" value={formData.guests} onChange={handleInputChange}>
+                            <select name="guests" value={formData.guests} onChange={handleInputChange} className="guest-select">
                                 {[1, 2, 3, 4, 5, 6, 7, 8].map(n => <option key={n} value={n}>{n} Guests</option>)}
                             </select>
                         </div>
@@ -86,6 +176,7 @@ const BookingForm = () => {
                             variant="primary"
                             onClick={checkAvailability}
                             disabled={isChecking || !formData.date || !formData.time}
+                            className="full-width-btn"
                         >
                             {isChecking ? 'AI Checking Availability...' : 'Check Availability'}
                         </Button>
@@ -101,6 +192,11 @@ const BookingForm = () => {
                         className="booking-step"
                     >
                         <h2>Contact Details</h2>
+                        <div className="summary-card">
+                            <p><strong>Date:</strong> {formData.date?.toLocaleDateString()}</p>
+                            <p><strong>Time:</strong> {formData.time}</p>
+                            <p><strong>Guests:</strong> {formData.guests}</p>
+                        </div>
                         <form onSubmit={handleSubmit}>
                             <div className="form-group">
                                 <label>Name</label>

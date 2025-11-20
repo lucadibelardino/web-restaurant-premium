@@ -1,40 +1,44 @@
 .booking-container {
-    max-width: 500px;
+    max-width: 600px;
     margin: 0 auto;
-    background: rgba(20, 20, 20, 0.6);
+    background: rgba(20, 20, 20, 0.8);
     backdrop-filter: blur(20px);
-    padding: var(--space-lg);
+    padding: var(--space-xl);
     border: 1px solid var(--color-border-subtle);
-    border-radius: 8px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .booking-step h2 {
-    margin-bottom: var(--space-md);
+    margin-bottom: var(--space-lg);
     text-align: center;
     color: var(--color-accent-gold);
+    font-family: var(--font-family-heading);
 }
 
 .form-group {
-    margin-bottom: var(--space-md);
+    margin-bottom: var(--space-lg);
 }
 
 .form-group label {
     display: block;
-    margin-bottom: var(--space-xs);
+    margin-bottom: var(--space-sm);
     font-size: var(--font-size-sm);
     color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .form-group input,
 .form-group select {
     width: 100%;
-    padding: var(--space-sm);
+    padding: var(--space-md);
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--color-border-subtle);
     color: var(--color-text-primary);
     font-family: var(--font-family-body);
     font-size: var(--font-size-base);
-    border-radius: 4px;
+    border-radius: 6px;
     outline: none;
     transition: border-color var(--transition-fast);
 }
@@ -44,31 +48,95 @@
     border-color: var(--color-accent-gold);
 }
 
+/* Time Grid Styles */
+.time-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 10px;
+}
+
+.time-slot {
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--color-border-subtle);
+    color: var(--color-text-primary);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: var(--font-size-sm);
+}
+
+.time-slot:hover {
+    border-color: var(--color-accent-gold);
+    background: rgba(212, 175, 55, 0.1);
+}
+
+.time-slot.selected {
+    background: var(--color-accent-gold);
+    color: var(--color-bg-primary);
+    border-color: var(--color-accent-gold);
+    font-weight: bold;
+}
+
+.no-slots {
+    color: var(--color-text-muted);
+    font-style: italic;
+    text-align: center;
+    padding: var(--space-md);
+}
+
+.full-width-btn {
+    width: 100%;
+    margin-top: var(--space-lg);
+}
+
+.summary-card {
+    background: rgba(255, 255, 255, 0.03);
+    padding: var(--space-md);
+    border-radius: 6px;
+    margin-bottom: var(--space-lg);
+    border: 1px solid var(--color-border-subtle);
+}
+
+.summary-card p {
+    margin-bottom: var(--space-xs);
+    color: var(--color-text-secondary);
+}
+
+.summary-card strong {
+    color: var(--color-accent-gold);
+    margin-right: var(--space-sm);
+}
+
+/* AI Suggestion */
 .ai-suggestion {
     background: rgba(212, 175, 55, 0.1);
     border: 1px solid var(--color-accent-gold);
-    padding: var(--space-sm);
-    border-radius: 4px;
-    margin-bottom: var(--space-md);
+    padding: var(--space-md);
+    border-radius: 6px;
+    margin-bottom: var(--space-lg);
 }
 
 .ai-suggestion p {
     font-size: var(--font-size-sm);
     color: var(--color-accent-gold);
-    margin-bottom: var(--space-xs);
+    margin-bottom: var(--space-sm);
 }
 
 .suggestion-actions {
     display: flex;
-    gap: var(--space-xs);
+    gap: var(--space-sm);
 }
 
 .suggestion-actions button {
     font-size: var(--font-size-xs);
-    padding: 4px 8px;
+    padding: 6px 12px;
     border: 1px solid var(--color-accent-gold);
     color: var(--color-accent-gold);
-    border-radius: 2px;
+    border-radius: 4px;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
 .suggestion-actions button:hover {
@@ -84,11 +152,25 @@
 
 .booking-success {
     text-align: center;
+    padding: var(--space-xl) 0;
 }
 
 .success-icon {
-    font-size: var(--font-size-4xl);
+    font-size: 4rem;
     margin-bottom: var(--space-md);
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
 }
 
 .booking-success p {

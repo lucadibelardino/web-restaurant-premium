@@ -1,0 +1,91 @@
+.custom-calendar {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 8px;
+    padding: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+}
+
+.calendar-header h3 {
+    color: var(--color-accent-gold);
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-lg);
+    margin: 0;
+}
+
+.nav-btn {
+    background: none;
+    border: 1px solid var(--color-border-subtle);
+    color: var(--color-text-primary);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-btn:hover {
+    border-color: var(--color-accent-gold);
+    color: var(--color-accent-gold);
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    text-align: center;
+}
+
+.weekday {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: var(--space-xs);
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.calendar-day:hover:not(.disabled) {
+    background: rgba(212, 175, 55, 0.1);
+    border-color: var(--color-accent-gold);
+}
+
+.calendar-day.selected {
+    background: var(--color-accent-gold);
+    color: var(--color-bg-primary);
+    font-weight: bold;
+}
+
+.calendar-day.disabled {
+    color: var(--color-text-muted);
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.calendar-day.empty {
+    cursor: default;
+}
