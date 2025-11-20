@@ -1,0 +1,130 @@
+.cms-dashboard {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    padding: var(--space-md);
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+    border-bottom: 1px solid var(--color-border-subtle);
+    padding-bottom: var(--space-sm);
+}
+
+.dish-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-sm);
+    background: rgba(255, 255, 255, 0.03);
+    margin-bottom: var(--space-xs);
+    border-radius: 4px;
+}
+
+.dish-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex: 2;
+}
+
+.dish-thumb {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.dish-category {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+}
+
+.dish-price {
+    flex: 1;
+    font-family: var(--font-family-heading);
+    color: var(--color-accent-gold);
+}
+
+.dish-actions {
+    display: flex;
+    gap: var(--space-xs);
+}
+
+.dish-actions button {
+    padding: 4px 8px;
+    border: 1px solid var(--color-border-subtle);
+    color: var(--color-text-secondary);
+    border-radius: 2px;
+    font-size: var(--font-size-xs);
+    transition: all var(--transition-fast);
+}
+
+.dish-actions button:hover {
+    border-color: var(--color-text-primary);
+    color: var(--color-text-primary);
+}
+
+.dish-actions .delete-btn:hover {
+    border-color: #ff4444;
+    color: #ff4444;
+}
+
+/* Editor Styles */
+.editor-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--z-modal);
+}
+
+.editor-modal {
+    background: var(--color-bg-secondary);
+    padding: var(--space-lg);
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    border: 1px solid var(--color-border-subtle);
+}
+
+.editor-modal h3 {
+    margin-bottom: var(--space-md);
+    color: var(--color-accent-gold);
+}
+
+.editor-modal textarea {
+    width: 100%;
+    height: 100px;
+    padding: var(--space-sm);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--color-border-subtle);
+    color: var(--color-text-primary);
+    border-radius: 4px;
+    resize: vertical;
+}
+
+.form-row {
+    display: flex;
+    gap: var(--space-md);
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.editor-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-sm);
+    margin-top: var(--space-md);
+}

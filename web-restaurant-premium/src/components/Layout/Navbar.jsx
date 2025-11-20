@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
 import Button from '../UI/Button';
@@ -35,17 +36,19 @@ const Navbar = () => {
         >
             <div className="navbar-container container">
                 <div className="navbar-logo">
-                    <a href="/">LU</a>
+                    <Link to="/">LU</Link>
                 </div>
 
                 <div className="navbar-links">
-                    <a href="#menu">Menu</a>
-                    <a href="#story">Story</a>
-                    <a href="#events">Events</a>
+                    <Link to="/menu">Menu</Link>
+                    <Link to="/#story">Story</Link>
+                    <Link to="/#events">Events</Link>
                 </div>
 
                 <div className="navbar-actions">
-                    <Button variant="primary">Book Table</Button>
+                    <Link to="/reservations">
+                        <Button variant="primary">Book Table</Button>
+                    </Link>
                 </div>
             </div>
         </motion.nav>

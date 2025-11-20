@@ -1,0 +1,27 @@
+.interactive-menu {
+    width: 100%;
+}
+
+.menu-filters {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+    flex-wrap: wrap;
+}
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--space-md);
+}
+
+@media (max-width: 768px) {
+    .menu-filters {
+        gap: var(--space-xs);
+    }
+
+    .menu-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,75 @@
+.dish-card {
+    padding: 0;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.dish-image-container {
+    position: relative;
+    width: 100%;
+    height: 250px;
+    overflow: hidden;
+}
+
+.dish-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-smooth);
+}
+
+.dish-card:hover .dish-image {
+    transform: scale(1.1);
+}
+
+.dish-price {
+    position: absolute;
+    top: var(--space-sm);
+    right: var(--space-sm);
+    background-color: rgba(10, 10, 10, 0.8);
+    color: var(--color-accent-gold);
+    padding: var(--space-xs) var(--space-sm);
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-lg);
+    backdrop-filter: blur(4px);
+}
+
+.dish-content {
+    padding: var(--space-md);
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.dish-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: var(--space-xs);
+}
+
+.dish-header h3 {
+    font-size: var(--font-size-xl);
+    color: var(--color-text-primary);
+}
+
+.dish-dietary {
+    display: flex;
+    gap: 4px;
+}
+
+.dietary-tag {
+    font-size: 0.7rem;
+    border: 1px solid var(--color-text-secondary);
+    color: var(--color-text-secondary);
+    padding: 2px 6px;
+    border-radius: 10px;
+}
+
+.dish-description {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+}
