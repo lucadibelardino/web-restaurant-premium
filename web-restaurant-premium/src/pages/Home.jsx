@@ -10,57 +10,61 @@ const Section = ({ children, image, align = 'center' }) => {
         offset: ["start end", "end start"]
     });
 
-    // Parallax effect for the background
-    const y = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
-    const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
+    // "Walking" effect: Zoom in (Scale) and slight opacity change
+    const scale = useTransform(scrollYProgress, [0, 1], [1, 1.3]);
+    const opacity = useTransform(scrollYProgress, [0.2, 0.5, 0.8], [0, 1, 0]);
+
+    // Parallax Y for a subtle movement to counter the sticky feeling slightly, giving depth
+    // const y = useTransform(scrollYProgress, [0, 1], ["0%", "10%"]); 
 
     return (
         <section ref={ref} style={{
-            height: '200vh', // Tall section for scrolling space
+            height: '300vh', // Very tall to make the "walk" feel slow and deliberate
             position: 'relative',
-            // overflow: 'hidden' REMOVED to allow sticky to work relative to viewport
         }}>
-            {/* Background Wrapper - Handles clipping */}
-            <div style={{
-                position: 'absolute',
-                top: 0, left: 0, right: 0, bottom: 0,
-                overflow: 'hidden',
-                zIndex: -1
-            }}>
-                <motion.div style={{
-                    position: 'absolute',
-                    top: '-10%', left: 0, right: 0, bottom: '-10%', // Extend to allow parallax movement
-                    backgroundImage: `url(${image})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    y,
-                }} />
-                <div style={{
-                    position: 'absolute',
-                    top: 0, left: 0, right: 0, bottom: 0,
-                    background: 'rgba(0,0,0,0.4)',
-                    zIndex: 1
-                }} />
-            </div>
-
-            {/* Sticky Content Wrapper */}
+            {/* Sticky Background - Stays fixed while scrolling through the section */}
             <div style={{
                 position: 'sticky',
                 top: 0,
                 height: '100vh',
+                overflow: 'hidden',
+                zIndex: 0
+            }}>
+                <motion.div style={{
+                    width: '100%',
+                    height: '100%',
+                    backgroundImage: `url(${image})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    scale, // Apply zoom effect
+                }} />
+                <div style={{
+                    position: 'absolute',
+                    top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.5)', // Darker overlay for better text contrast
+                    zIndex: 1
+                }} />
+            </div>
+
+            {/* Sticky Content - Overlays the background */}
+            <div style={{
+                position: 'sticky',
+                top: 0,
+                height: '100vh',
+                marginTop: '-100vh', // Pull content up to overlap the sticky background
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center',
-                zIndex: 1,
+                zIndex: 2,
                 padding: '0 var(--space-2xl)',
-                pointerEvents: 'none' // Allow clicks to pass through if needed, but buttons need pointer-events: auto
+                pointerEvents: 'none'
             }}>
                 <motion.div style={{
                     maxWidth: '600px',
                     textAlign: align === 'center' ? 'center' : 'left',
                     color: 'white',
-                    opacity,
-                    pointerEvents: 'auto' // Re-enable clicks for content
+                    opacity, // Fade in/out based on scroll position
+                    pointerEvents: 'auto'
                 }}>
                     {children}
                 </motion.div>
