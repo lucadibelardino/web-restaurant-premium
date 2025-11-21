@@ -27,11 +27,18 @@ const Home = () => {
         if (videoRef.current && videoRef.current.duration) {
             const vidDuration = videoRef.current.duration || duration;
             if (vidDuration) {
-                const time = latest * vidDuration;
-                if (isFinite(time)) {
-                    // Use a small threshold to avoid unnecessary updates
-                    if (Math.abs(videoRef.current.currentTime - time) > 0.05) {
-                        videoRef.current.currentTime = time;
+                const rawTime = latest * vidDuration;
+
+                // Quantize to 30fps (0.033s) to avoid micro-seeking
+                // This helps the decoder snap to frames instead of hunting
+                const FPS = 30;
+                const step = 1 / FPS;
+                const quantizedTime = Math.floor(rawTime / step) * step;
+
+                if (isFinite(quantizedTime)) {
+                    // Only update if the time has changed significantly (by at least one frame)
+                    if (Math.abs(videoRef.current.currentTime - quantizedTime) >= step) {
+                        videoRef.current.currentTime = quantizedTime;
                     }
                 }
             }
