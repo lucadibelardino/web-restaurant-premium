@@ -8,62 +8,75 @@ const Home = () => {
     const videoRef = useRef(null);
     const containerRef = useRef(null);
     const [duration, setDuration] = useState(0);
+    const [isVideoLoaded, setIsVideoLoaded] = useState(false);
 
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ["start start", "end end"]
     });
 
-    // Smooth out the scroll progress to prevent video jitter
+    // Smoother, "heavier" physics to mask video seeking jitter
     const smoothProgress = useSpring(scrollYProgress, {
-        damping: 15,
-        mass: 0.1,
+        damping: 20,
+        mass: 0.2,
         stiffness: 50
     });
 
     // Update video time based on smoothed progress
     useMotionValueEvent(smoothProgress, "change", (latest) => {
         if (videoRef.current && videoRef.current.duration) {
-            // Ensure we have duration (sometimes it's NaN initially)
             const vidDuration = videoRef.current.duration || duration;
             if (vidDuration) {
                 const time = latest * vidDuration;
-                // Use requestAnimationFrame for smoother visual updates if possible,
-                // but setting currentTime directly is standard.
-                // The spring helps significantly.
                 if (isFinite(time)) {
-                    videoRef.current.currentTime = time;
+                    // Use a small threshold to avoid unnecessary updates
+                    if (Math.abs(videoRef.current.currentTime - time) > 0.05) {
+                        videoRef.current.currentTime = time;
+                    }
                 }
             }
         }
     });
 
-    // Capture duration when metadata loads
     const handleLoadedMetadata = () => {
         if (videoRef.current) {
             setDuration(videoRef.current.duration);
+            setIsVideoLoaded(true);
         }
     };
 
+    // Construct correct video path handling both dev and prod
+    const videoPath = `${import.meta.env.BASE_URL}video-scroll.mp4`;
+
     // Opacity transforms for different text sections
     // Section 1: 0% - 20%
-    const opacity1 = useTransform(scrollYProgress, [0, 0.15, 0.25], [1, 1, 0]);
-    const y1 = useTransform(scrollYProgress, [0, 0.2], [0, -50]);
+    const opacity1 = useTransform(smoothProgress, [0, 0.15, 0.25], [1, 1, 0]);
+    const y1 = useTransform(smoothProgress, [0, 0.2], [0, -50]);
 
     // Section 2: 30% - 50%
-    const opacity2 = useTransform(scrollYProgress, [0.25, 0.35, 0.5, 0.6], [0, 1, 1, 0]);
-    const y2 = useTransform(scrollYProgress, [0.25, 0.35], [50, 0]);
+    const opacity2 = useTransform(smoothProgress, [0.25, 0.35, 0.5, 0.6], [0, 1, 1, 0]);
+    const y2 = useTransform(smoothProgress, [0.25, 0.35], [50, 0]);
 
     // Section 3: 60% - 80%
-    const opacity3 = useTransform(scrollYProgress, [0.6, 0.7, 0.85, 0.95], [0, 1, 1, 0]);
-    const y3 = useTransform(scrollYProgress, [0.6, 0.7], [50, 0]);
+    const opacity3 = useTransform(smoothProgress, [0.6, 0.7, 0.85, 0.95], [0, 1, 1, 0]);
+    const y3 = useTransform(smoothProgress, [0.6, 0.7], [50, 0]);
 
     // Section 4: 90% - 100% (Final CTA)
-    const opacity4 = useTransform(scrollYProgress, [0.9, 1], [0, 1]);
-    const y4 = useTransform(scrollYProgress, [0.9, 1], [50, 0]);
+    const opacity4 = useTransform(smoothProgress, [0.9, 1], [0, 1]);
+    const y4 = useTransform(smoothProgress, [0.9, 1], [50, 0]);
 
     return (
-        <main ref={containerRef} style={{ height: '400vh', position: 'relative' }}>
+        <main ref={containerRef} style={{ height: '500vh', position: 'relative' }}> {/* Increased height for even slower scroll */}
+            {/* Loading State */}
+            {!isVideoLoaded && (
+                <div style={{
+                    position: 'fixed', inset: 0, background: '#0a0a0a', zIndex: 10,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white'
+                }}>
+                    Loading Experience...
+                </div>
+            )}
+
             {/* Fixed Video Background */}
             <div style={{
                 position: 'fixed',
@@ -77,7 +90,7 @@ const Home = () => {
                 <video
                     ref={videoRef}
                     id="background-video"
-                    src="/web-restaurant-premium/video-scroll.mp4"
+                    src={videoPath}
                     muted
                     playsInline
                     preload="auto"
@@ -85,7 +98,9 @@ const Home = () => {
                     style={{
                         width: '100%',
                         height: '100%',
-                        objectFit: 'cover'
+                        objectFit: 'cover',
+                        opacity: isVideoLoaded ? 1 : 0,
+                        transition: 'opacity 1s ease'
                     }}
                 />
                 {/* Dark overlay for text readability */}
