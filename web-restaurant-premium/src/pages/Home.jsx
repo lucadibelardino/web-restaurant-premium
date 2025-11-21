@@ -1,4 +1,4 @@
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useRef } from 'react';
 import Button from '../components/UI/Button';
@@ -74,57 +74,116 @@ const Section = ({ children, image, align = 'center' }) => {
 };
 
 const Home = () => {
+    const videoRef = useRef(null);
+    const containerRef = useRef(null);
+
+    const { scrollYProgress } = useScroll({
+        target: containerRef,
+        offset: ["start start", "end end"]
+    });
+
+    useMotionValueEvent(scrollYProgress, "change", (latest) => {
+        if (videoRef.current && videoRef.current.duration) {
+            // Map scroll progress (0-1) to video duration (e.g., 7s)
+            // Ensure we don't exceed duration
+            const time = latest * videoRef.current.duration;
+            if (isFinite(time)) {
+                videoRef.current.currentTime = time;
+            }
+        }
+    });
+
     return (
-        <main>
-            {/* Hero / Entrance */}
-            <Section image="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=2000">
-                <motion.h1
+        <main ref={containerRef} style={{ height: '300vh', position: 'relative' }}>
+            {/* Fixed Video Background */}
+            <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100vh',
+                zIndex: -1,
+                overflow: 'hidden'
+            }}>
+                <video
+                    ref={videoRef}
+                    id="background-video"
+                    src="/web-restaurant-premium/video-scroll.mp4" // Path relative to public, with base path
+                    muted
+                    playsInline
+                    preload="auto"
+                    style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover'
+                    }}
+                />
+                {/* Overlay for text readability */}
+                <div style={{
+                    position: 'absolute',
+                    top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.3)',
+                    zIndex: 1
+                }} />
+            </div>
+
+            {/* Scrollable Content Overlay */}
+            <div style={{
+                position: 'relative',
+                zIndex: 1,
+                paddingTop: '40vh', // Start content lower down
+                paddingBottom: '40vh',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '80vh', // Space out text sections to match video progression
+                pointerEvents: 'none' // Let clicks pass through to video if needed, but usually we want text interaction
+            }}>
+                {/* Section 1: Entrance */}
+                <motion.div
                     initial={{ opacity: 0, y: 50 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1 }}
-                    style={{ fontSize: 'var(--font-size-display)', marginBottom: 'var(--space-md)' }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8 }}
+                    style={{ textAlign: 'center', pointerEvents: 'auto' }}
                 >
-                    LU
-                </motion.h1>
-                <p style={{ fontSize: 'var(--font-size-xl)', marginBottom: 'var(--space-lg)' }}>
-                    Enter a world where taste meets art.
-                </p>
-                <Link to="/menu">
-                    <Button variant="primary">Begin Journey</Button>
-                </Link>
-            </Section>
+                    <h1 style={{ fontSize: 'var(--font-size-display)', color: 'white', marginBottom: 'var(--space-md)' }}>LU</h1>
+                    <p style={{ fontSize: 'var(--font-size-xl)', color: 'white' }}>Welcome to the Experience</p>
+                </motion.div>
 
-            {/* The Dining Room */}
-            <Section image="https://images.unsplash.com/photo-1550966871-3ed3c47e2ce2?auto=format&fit=crop&q=80&w=2000" align="left">
-                <h2 style={{ fontSize: 'var(--font-size-4xl)', marginBottom: 'var(--space-md)', color: 'var(--color-accent-gold)' }}>The Atmosphere</h2>
-                <p style={{ fontSize: 'var(--font-size-lg)', lineHeight: 1.6 }}>
-                    Designed for intimacy and grandeur. Our dining room is a sanctuary of calm, where every detail is curated to enhance your culinary experience.
-                </p>
-            </Section>
+                {/* Section 2: The Journey */}
+                <motion.div
+                    initial={{ opacity: 0, y: 50 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8 }}
+                    style={{ textAlign: 'center', pointerEvents: 'auto', maxWidth: '600px', padding: '0 var(--space-md)' }}
+                >
+                    <h2 style={{ fontSize: 'var(--font-size-4xl)', color: 'var(--color-accent-gold)', marginBottom: 'var(--space-md)' }}>The Journey</h2>
+                    <p style={{ fontSize: 'var(--font-size-lg)', color: 'white', lineHeight: 1.6 }}>
+                        From the bustling street to the serene table. Every step is part of the story.
+                    </p>
+                </motion.div>
 
-            {/* The Kitchen */}
-            <Section image="https://images.unsplash.com/photo-1556910103-1c02745a30bf?auto=format&fit=crop&q=80&w=2000" align="right">
-                <h2 style={{ fontSize: 'var(--font-size-4xl)', marginBottom: 'var(--space-md)', color: 'var(--color-accent-gold)' }}>The Craft</h2>
-                <p style={{ fontSize: 'var(--font-size-lg)', lineHeight: 1.6 }}>
-                    Precision. Passion. Perfection. Our chefs transform the finest local ingredients into edible masterpieces.
-                </p>
-            </Section>
-
-            {/* The Experience / Call to Action */}
-            <Section image="https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&q=80&w=2000">
-                <h2 style={{ fontSize: 'var(--font-size-4xl)', marginBottom: 'var(--space-md)' }}>Your Table Awaits</h2>
-                <p style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-xl)' }}>
-                    Join us for an unforgettable evening.
-                </p>
-                <div style={{ display: 'flex', gap: 'var(--space-md)', justifyContent: 'center' }}>
-                    <Link to="/reservations">
-                        <Button variant="primary">Book Now</Button>
-                    </Link>
-                    <Link to="/story">
-                        <Button variant="outline">Read Our Story</Button>
-                    </Link>
-                </div>
-            </Section>
+                {/* Section 3: The Culmination */}
+                <motion.div
+                    initial={{ opacity: 0, y: 50 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8 }}
+                    style={{ textAlign: 'center', pointerEvents: 'auto' }}
+                >
+                    <h2 style={{ fontSize: 'var(--font-size-4xl)', color: 'var(--color-accent-gold)', marginBottom: 'var(--space-md)' }}>A Masterpiece</h2>
+                    <p style={{ fontSize: 'var(--font-size-lg)', color: 'white', marginBottom: 'var(--space-xl)' }}>
+                        Taste the perfection.
+                    </p>
+                    <div style={{ display: 'flex', gap: 'var(--space-md)', justifyContent: 'center' }}>
+                        <Link to="/menu">
+                            <Button variant="primary">View Menu</Button>
+                        </Link>
+                        <Link to="/reservations">
+                            <Button variant="outline">Book Table</Button>
+                        </Link>
+                    </div>
+                </motion.div>
+            </div>
         </main>
     );
 };
