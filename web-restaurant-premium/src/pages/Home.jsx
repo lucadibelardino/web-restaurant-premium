@@ -10,27 +10,28 @@ const Section = ({ children, image, align = 'center' }) => {
         offset: ["start end", "end start"]
     });
 
-    const y = useTransform(scrollYProgress, [0, 1], ["-20%", "20%"]);
+    // Parallax effect for the background
+    const y = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
     const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
 
     return (
         <section ref={ref} style={{
-            height: '100vh',
+            height: '200vh', // Increased height to allow scrolling "through" the section
             position: 'relative',
             overflow: 'hidden',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center'
         }}>
+            {/* Background Image */}
             <motion.div style={{
                 position: 'absolute',
                 top: 0, left: 0, right: 0, bottom: 0,
                 backgroundImage: `url(${image})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
-                y,
+                y, // Apply parallax
                 zIndex: -1
             }} />
+
+            {/* Overlay */}
             <div style={{
                 position: 'absolute',
                 top: 0, left: 0, right: 0, bottom: 0,
@@ -38,17 +39,26 @@ const Section = ({ children, image, align = 'center' }) => {
                 zIndex: 0
             }} />
 
-            <motion.div style={{
-                position: 'relative',
+            {/* Sticky Content Wrapper */}
+            <div style={{
+                position: 'sticky',
+                top: 0,
+                height: '100vh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center',
                 zIndex: 1,
-                padding: 'var(--space-2xl)',
-                maxWidth: '600px',
-                textAlign: align === 'center' ? 'center' : 'left',
-                color: 'white',
-                opacity
+                padding: '0 var(--space-2xl)' // Add horizontal padding to container
             }}>
-                {children}
-            </motion.div>
+                <motion.div style={{
+                    maxWidth: '600px',
+                    textAlign: align === 'center' ? 'center' : 'left',
+                    color: 'white',
+                    opacity
+                }}>
+                    {children}
+                </motion.div>
+            </div>
         </section>
     );
 };
