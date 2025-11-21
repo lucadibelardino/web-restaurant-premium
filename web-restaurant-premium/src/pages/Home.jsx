@@ -16,28 +16,32 @@ const Section = ({ children, image, align = 'center' }) => {
 
     return (
         <section ref={ref} style={{
-            height: '200vh', // Increased height to allow scrolling "through" the section
+            height: '200vh', // Tall section for scrolling space
             position: 'relative',
-            overflow: 'hidden',
+            // overflow: 'hidden' REMOVED to allow sticky to work relative to viewport
         }}>
-            {/* Background Image */}
-            <motion.div style={{
-                position: 'absolute',
-                top: 0, left: 0, right: 0, bottom: 0,
-                backgroundImage: `url(${image})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                y, // Apply parallax
-                zIndex: -1
-            }} />
-
-            {/* Overlay */}
+            {/* Background Wrapper - Handles clipping */}
             <div style={{
                 position: 'absolute',
                 top: 0, left: 0, right: 0, bottom: 0,
-                background: 'rgba(0,0,0,0.4)',
-                zIndex: 0
-            }} />
+                overflow: 'hidden',
+                zIndex: -1
+            }}>
+                <motion.div style={{
+                    position: 'absolute',
+                    top: '-10%', left: 0, right: 0, bottom: '-10%', // Extend to allow parallax movement
+                    backgroundImage: `url(${image})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    y,
+                }} />
+                <div style={{
+                    position: 'absolute',
+                    top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.4)',
+                    zIndex: 1
+                }} />
+            </div>
 
             {/* Sticky Content Wrapper */}
             <div style={{
@@ -48,13 +52,15 @@ const Section = ({ children, image, align = 'center' }) => {
                 alignItems: 'center',
                 justifyContent: align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center',
                 zIndex: 1,
-                padding: '0 var(--space-2xl)' // Add horizontal padding to container
+                padding: '0 var(--space-2xl)',
+                pointerEvents: 'none' // Allow clicks to pass through if needed, but buttons need pointer-events: auto
             }}>
                 <motion.div style={{
                     maxWidth: '600px',
                     textAlign: align === 'center' ? 'center' : 'left',
                     color: 'white',
-                    opacity
+                    opacity,
+                    pointerEvents: 'auto' // Re-enable clicks for content
                 }}>
                     {children}
                 </motion.div>
