@@ -1,100 +1,69 @@
-import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion';
+
+import { motion, useScroll, useTransform, useSpring, useMotionValueEvent } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import Button from '../components/UI/Button';
-
-const Section = ({ children, image, align = 'center' }) => {
-    const ref = useRef(null);
-    const { scrollYProgress } = useScroll({
-        target: ref,
-        offset: ["start end", "end start"]
-    });
-
-    // "Walking" effect: Zoom in (Scale) and slight opacity change
-    const scale = useTransform(scrollYProgress, [0, 1], [1, 1.3]);
-    const opacity = useTransform(scrollYProgress, [0.2, 0.5, 0.8], [0, 1, 0]);
-
-    // Parallax Y for a subtle movement to counter the sticky feeling slightly, giving depth
-    // const y = useTransform(scrollYProgress, [0, 1], ["0%", "10%"]); 
-
-    return (
-        <section ref={ref} style={{
-            height: '300vh', // Very tall to make the "walk" feel slow and deliberate
-            position: 'relative',
-        }}>
-            {/* Sticky Background - Stays fixed while scrolling through the section */}
-            <div style={{
-                position: 'sticky',
-                top: 0,
-                height: '100vh',
-                overflow: 'hidden',
-                zIndex: 0
-            }}>
-                <motion.div style={{
-                    width: '100%',
-                    height: '100%',
-                    backgroundImage: `url(${image})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    scale, // Apply zoom effect
-                }} />
-                <div style={{
-                    position: 'absolute',
-                    top: 0, left: 0, right: 0, bottom: 0,
-                    background: 'rgba(0,0,0,0.5)', // Darker overlay for better text contrast
-                    zIndex: 1
-                }} />
-            </div>
-
-            {/* Sticky Content - Overlays the background */}
-            <div style={{
-                position: 'sticky',
-                top: 0,
-                height: '100vh',
-                marginTop: '-100vh', // Pull content up to overlap the sticky background
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center',
-                zIndex: 2,
-                padding: '0 var(--space-2xl)',
-                pointerEvents: 'none'
-            }}>
-                <motion.div style={{
-                    maxWidth: '600px',
-                    textAlign: align === 'center' ? 'center' : 'left',
-                    color: 'white',
-                    opacity, // Fade in/out based on scroll position
-                    pointerEvents: 'auto'
-                }}>
-                    {children}
-                </motion.div>
-            </div>
-        </section>
-    );
-};
 
 const Home = () => {
     const videoRef = useRef(null);
     const containerRef = useRef(null);
+    const [duration, setDuration] = useState(0);
 
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ["start start", "end end"]
     });
 
-    useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    // Smooth out the scroll progress to prevent video jitter
+    const smoothProgress = useSpring(scrollYProgress, {
+        damping: 15,
+        mass: 0.1,
+        stiffness: 50
+    });
+
+    // Update video time based on smoothed progress
+    useMotionValueEvent(smoothProgress, "change", (latest) => {
         if (videoRef.current && videoRef.current.duration) {
-            // Map scroll progress (0-1) to video duration (e.g., 7s)
-            // Ensure we don't exceed duration
-            const time = latest * videoRef.current.duration;
-            if (isFinite(time)) {
-                videoRef.current.currentTime = time;
+            // Ensure we have duration (sometimes it's NaN initially)
+            const vidDuration = videoRef.current.duration || duration;
+            if (vidDuration) {
+                const time = latest * vidDuration;
+                // Use requestAnimationFrame for smoother visual updates if possible,
+                // but setting currentTime directly is standard.
+                // The spring helps significantly.
+                if (isFinite(time)) {
+                    videoRef.current.currentTime = time;
+                }
             }
         }
     });
 
+    // Capture duration when metadata loads
+    const handleLoadedMetadata = () => {
+        if (videoRef.current) {
+            setDuration(videoRef.current.duration);
+        }
+    };
+
+    // Opacity transforms for different text sections
+    // Section 1: 0% - 20%
+    const opacity1 = useTransform(scrollYProgress, [0, 0.15, 0.25], [1, 1, 0]);
+    const y1 = useTransform(scrollYProgress, [0, 0.2], [0, -50]);
+
+    // Section 2: 30% - 50%
+    const opacity2 = useTransform(scrollYProgress, [0.25, 0.35, 0.5, 0.6], [0, 1, 1, 0]);
+    const y2 = useTransform(scrollYProgress, [0.25, 0.35], [50, 0]);
+
+    // Section 3: 60% - 80%
+    const opacity3 = useTransform(scrollYProgress, [0.6, 0.7, 0.85, 0.95], [0, 1, 1, 0]);
+    const y3 = useTransform(scrollYProgress, [0.6, 0.7], [50, 0]);
+
+    // Section 4: 90% - 100% (Final CTA)
+    const opacity4 = useTransform(scrollYProgress, [0.9, 1], [0, 1]);
+    const y4 = useTransform(scrollYProgress, [0.9, 1], [50, 0]);
+
     return (
-        <main ref={containerRef} style={{ height: '300vh', position: 'relative' }}>
+        <main ref={containerRef} style={{ height: '400vh', position: 'relative' }}>
             {/* Fixed Video Background */}
             <div style={{
                 position: 'fixed',
@@ -102,88 +71,133 @@ const Home = () => {
                 left: 0,
                 width: '100%',
                 height: '100vh',
-                zIndex: -1,
+                zIndex: 0,
                 overflow: 'hidden'
             }}>
                 <video
                     ref={videoRef}
                     id="background-video"
-                    src="/web-restaurant-premium/video-scroll.mp4" // Path relative to public, with base path
+                    src="/web-restaurant-premium/video-scroll.mp4"
                     muted
                     playsInline
                     preload="auto"
+                    onLoadedMetadata={handleLoadedMetadata}
                     style={{
                         width: '100%',
                         height: '100%',
                         objectFit: 'cover'
                     }}
                 />
-                {/* Overlay for text readability */}
+                {/* Dark overlay for text readability */}
                 <div style={{
                     position: 'absolute',
                     top: 0, left: 0, right: 0, bottom: 0,
-                    background: 'rgba(0,0,0,0.3)',
+                    background: 'rgba(0,0,0,0.4)',
                     zIndex: 1
                 }} />
             </div>
 
-            {/* Scrollable Content Overlay */}
+            {/* Fixed Content Container - Text stays static in center */}
             <div style={{
-                position: 'relative',
-                zIndex: 1,
-                paddingTop: '40vh', // Start content lower down
-                paddingBottom: '40vh',
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100vh',
+                zIndex: 2,
                 display: 'flex',
-                flexDirection: 'column',
                 alignItems: 'center',
-                gap: '80vh', // Space out text sections to match video progression
-                pointerEvents: 'none' // Let clicks pass through to video if needed, but usually we want text interaction
+                justifyContent: 'center',
+                pointerEvents: 'none' // Allow scroll through
             }}>
+
                 {/* Section 1: Entrance */}
-                <motion.div
-                    initial={{ opacity: 0, y: 50 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8 }}
-                    style={{ textAlign: 'center', pointerEvents: 'auto' }}
-                >
+                <motion.div style={{
+                    position: 'absolute',
+                    textAlign: 'center',
+                    opacity: opacity1,
+                    y: y1,
+                    pointerEvents: 'auto'
+                }}>
                     <h1 style={{ fontSize: 'var(--font-size-display)', color: 'white', marginBottom: 'var(--space-md)' }}>LU</h1>
-                    <p style={{ fontSize: 'var(--font-size-xl)', color: 'white' }}>Welcome to the Experience</p>
+                    <p style={{ fontSize: 'var(--font-size-xl)', color: 'var(--color-text-secondary)' }}>Where Atmosphere Meets Taste</p>
                 </motion.div>
 
                 {/* Section 2: The Journey */}
-                <motion.div
-                    initial={{ opacity: 0, y: 50 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8 }}
-                    style={{ textAlign: 'center', pointerEvents: 'auto', maxWidth: '600px', padding: '0 var(--space-md)' }}
-                >
+                <motion.div style={{
+                    position: 'absolute',
+                    textAlign: 'center',
+                    maxWidth: '600px',
+                    opacity: opacity2,
+                    y: y2,
+                    pointerEvents: 'auto'
+                }}>
                     <h2 style={{ fontSize: 'var(--font-size-4xl)', color: 'var(--color-accent-gold)', marginBottom: 'var(--space-md)' }}>The Journey</h2>
                     <p style={{ fontSize: 'var(--font-size-lg)', color: 'white', lineHeight: 1.6 }}>
-                        From the bustling street to the serene table. Every step is part of the story.
+                        Step away from the noise. Enter a sanctuary designed for the senses.
                     </p>
                 </motion.div>
 
-                {/* Section 3: The Culmination */}
-                <motion.div
-                    initial={{ opacity: 0, y: 50 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8 }}
-                    style={{ textAlign: 'center', pointerEvents: 'auto' }}
-                >
-                    <h2 style={{ fontSize: 'var(--font-size-4xl)', color: 'var(--color-accent-gold)', marginBottom: 'var(--space-md)' }}>A Masterpiece</h2>
-                    <p style={{ fontSize: 'var(--font-size-lg)', color: 'white', marginBottom: 'var(--space-xl)' }}>
-                        Taste the perfection.
+                {/* Section 3: The Details */}
+                <motion.div style={{
+                    position: 'absolute',
+                    textAlign: 'center',
+                    maxWidth: '600px',
+                    opacity: opacity3,
+                    y: y3,
+                    pointerEvents: 'auto'
+                }}>
+                    <h2 style={{ fontSize: 'var(--font-size-4xl)', color: 'var(--color-accent-gold)', marginBottom: 'var(--space-md)' }}>The Craft</h2>
+                    <p style={{ fontSize: 'var(--font-size-lg)', color: 'white', lineHeight: 1.6, marginBottom: 'var(--space-lg)' }}>
+                        Every detail, from the lighting to the plating, is a deliberate stroke of art.
                     </p>
+                    <div style={{ display: 'flex', gap: 'var(--space-md)', justifyContent: 'center' }}>
+                        <Link to="/story">
+                            <Button variant="outline">Our Philosophy</Button>
+                        </Link>
+                        <Link to="/events">
+                            <Button variant="outline">Private Events</Button>
+                        </Link>
+                    </div>
+                </motion.div>
+
+                {/* Section 4: Final CTA */}
+                <motion.div style={{
+                    position: 'absolute',
+                    textAlign: 'center',
+                    opacity: opacity4,
+                    y: y4,
+                    pointerEvents: 'auto'
+                }}>
+                    <h2 style={{ fontSize: 'var(--font-size-5xl)', color: 'white', marginBottom: 'var(--space-lg)' }}>Experience Lu</h2>
                     <div style={{ display: 'flex', gap: 'var(--space-md)', justifyContent: 'center' }}>
                         <Link to="/menu">
                             <Button variant="primary">View Menu</Button>
                         </Link>
                         <Link to="/reservations">
-                            <Button variant="outline">Book Table</Button>
+                            <Button variant="primary">Book Your Table</Button>
                         </Link>
                     </div>
                 </motion.div>
+
             </div>
+
+            {/* Scroll Indicator */}
+            <motion.div
+                style={{
+                    position: 'fixed',
+                    bottom: '40px',
+                    left: '50%',
+                    x: '-50%',
+                    color: 'white',
+                    opacity: useTransform(scrollYProgress, [0, 0.1], [1, 0]),
+                    zIndex: 3
+                }}
+                animate={{ y: [0, 10, 0] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+            >
+                <span style={{ fontSize: 'var(--font-size-sm)', textTransform: 'uppercase', letterSpacing: '2px' }}>Scroll to Explore</span>
+            </motion.div>
         </main>
     );
 };
