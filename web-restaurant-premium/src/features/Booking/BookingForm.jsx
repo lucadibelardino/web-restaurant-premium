@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Button from '../../components/UI/Button';
 import Calendar from './Calendar';
 import './BookingForm.css';
+import { supabase } from '../../supabaseClient'; // Import the client we will create
 
 const BookingForm = () => {
     const [step, setStep] = useState(1);
@@ -102,10 +103,34 @@ const BookingForm = () => {
         }, 1500);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Simulate submission
-        setStep(3);
+
+        try {
+            // Format date as YYYY-MM-DD
+            const dateStr = formData.date.toISOString().split('T')[0];
+
+            const { data, error } = await supabase
+                .from('reservations')
+                .insert([
+                    {
+                        user_email: formData.email,
+                        reservation_date: dateStr,
+                        reservation_time: formData.time,
+                        service_type: 'dinner', // Defaulting to dinner as it's a restaurant
+                        status: 'pending',
+                        notes: `Guests: ${formData.guests}, Name: ${formData.name}, Phone: ${formData.phone}`
+                    }
+                ]);
+
+            if (error) throw error;
+
+            console.log('Reservation saved:', data);
+            setStep(3);
+        } catch (error) {
+            console.error('Error saving reservation:', error);
+            alert('Failed to save reservation: ' + error.message);
+        }
     };
 
     return (
